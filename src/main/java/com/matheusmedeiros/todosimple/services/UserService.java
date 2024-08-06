@@ -4,9 +4,12 @@ import com.matheusmedeiros.todosimple.models.User;
 import com.matheusmedeiros.todosimple.repositories.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
-import javax.transaction.Transactional;
 import java.util.Optional;
+
+
+
 
 @Service // se comunica com com os repositorios
 public class UserService {
@@ -27,19 +30,20 @@ public class UserService {
     @Transactional
         // usar sempre que for salvar algo no banco
         // Segue o padrão de banco de dados, ATOMICIDADE, ou cria ou não faz nada
-    public User createUser(User obj){
+    public User create(User obj){
+        obj.setId(null);
         obj = this.userRepository.save(obj);
         return obj;
     }
 
     @Transactional
-    public User updateUser(User obj){
+    public User update(User obj){
         User newObj = findById(obj.getId()); // garante que o usuario que será atualizado existe
         newObj.setPassword(obj.getPassword());
         return this.userRepository.save(newObj);
     }
 
-    public void deleteUser(long id){
+    public void delete(long id){
         findById(id);
 
         // verifica se id existe e se ele pode ser deletado

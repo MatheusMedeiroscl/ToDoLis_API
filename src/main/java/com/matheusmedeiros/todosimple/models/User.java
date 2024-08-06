@@ -9,17 +9,15 @@ import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonProperty.Access;
 
 @Entity
 @Table(name = User.TABLE_NAME)
 public class User {
-    public interface CreateUser {
-    }
-
-    public interface UpdateUser {
-    }
+    public interface CreateUser { } // garante a validação dos dados antes da criação do usuario
+    public interface UpdateUser { } // garante a validação dos dados no caso de uptades do usuario
 
     public static final String TABLE_NAME = "user";
 
@@ -36,7 +34,8 @@ public class User {
 
     @JsonProperty(access = Access.WRITE_ONLY)
     @Column(name = "password", length = 60, nullable = false)
-    @NotBlank(groups = { CreateUser.class, UpdateUser.class }) // Faz o notNull e NotEmpty ao mesmo tempo
+    @NotNull(groups = {CreateUser.class, UpdateUser.class})
+    @NotEmpty(groups = {CreateUser.class, UpdateUser.class})
     @Size(groups = { CreateUser.class, UpdateUser.class }, min = 8, max = 60)
     private String password;
 
@@ -60,15 +59,26 @@ public class User {
     public String getPassword() {return this.password;}
     public void setPassword(String password) {this.password = password;}
 
+    @JsonIgnore
     public List<Task> getTasks() {return tasks;}
     public void setTasks(List<Task> tasks) {this.tasks = tasks;}
 
     @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        User user = (User) o;
-        return Objects.equals(id, user.id) && Objects.equals(username, user.username) && Objects.equals(password, user.password);
+    public boolean equals(Object obj) {
+        if (obj == this)
+            return true;
+        if (obj == null)
+            return false;
+        if (!(obj instanceof User))
+            return false;
+        User other = (User) obj;
+        if (this.id == null)
+            if (other.id != null)
+                return false;
+            else if (!this.id.equals(other.id))
+                return false;
+        return Objects.equals(this.id, other.id) && Objects.equals(this.username, other.username)
+                && Objects.equals(this.password, other.password);
     }
 
     @Override

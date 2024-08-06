@@ -1,60 +1,59 @@
 package com.matheusmedeiros.todosimple.services;
 
+import java.util.List;
+import java.util.Optional;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
 import com.matheusmedeiros.todosimple.models.Task;
 import com.matheusmedeiros.todosimple.models.User;
 import com.matheusmedeiros.todosimple.repositories.TaskRepository;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
 
-import javax.transaction.Transactional;
-import java.util.Optional;
-
-@Service // se comunica com com os repositorios
+@Service
 public class TaskService {
-
 
     @Autowired
     private TaskRepository taskRepository;
+
     @Autowired
-    private UserService userServices;
+    private UserService userService;
 
-
-
-    public Task findById(long id){
+    public Task findById(Long id) {
         Optional<Task> task = this.taskRepository.findById(id);
         return task.orElseThrow(() -> new RuntimeException(
-                "Task não encontrada! id: " + id + ", tipo: " + Task.class.getName()
-        ));
+                "Tarefa não encontrada! Id: " + id + ", Tipo: " + Task.class.getName()));
+    }
+
+    public List<Task> findAllByUserId(Long userId) {
+        List<Task> tasks = this.taskRepository.findByUser_Id(userId);
+        return tasks;
     }
 
     @Transactional
-    public  Task createTask(Task obj){
-        //primeiro pesquisar se o user da task existe
-        User user = this.userServices.findById(obj.getUser().getId());
-        obj.setId();
+    public Task create(Task obj) {
+        User user = this.userService.findById(obj.getUser().getId());
+        obj.setId(null);
         obj.setUser(user);
         obj = this.taskRepository.save(obj);
-
         return obj;
     }
 
     @Transactional
-    public Task uptdateTask(Task obj){
+    public Task update(Task obj) {
         Task newObj = findById(obj.getId());
         newObj.setDescription(obj.getDescription());
-
         return this.taskRepository.save(newObj);
     }
 
-    public void deleteTask(long id){
+    public void delete(Long id) {
         findById(id);
-
-        // verifica se id existe e se ele pode ser deletado
-        //Se o user tiver entidades relacionados a ele  (tasks) ele não pode ser deletado
         try {
             this.taskRepository.deleteById(id);
-        }catch (Exception e){
-            throw new RuntimeException("Não é possivel deletar esta task! pois a entidades relacionadas");
+        } catch (Exception e) {
+            throw new RuntimeException("Não é possível excluir pois há entidades relacionadas!");
         }
     }
+
 }
