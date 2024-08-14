@@ -3,6 +3,7 @@ package com.matheusmedeiros.todosimple.services;
 import java.util.List;
 import java.util.Optional;
 
+import com.matheusmedeiros.todosimple.services.exceptions.DataBindingViolationException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -52,7 +53,7 @@ public class TaskService {
         try {
             this.taskRepository.deleteById(id);
         } catch (Exception e) {
-            throw new RuntimeException("Não é possível excluir pois há entidades relacionadas!");
+            throw new DataBindingViolationException("Não é possível excluir pois há entidades relacionadas!");
         }
     }
 

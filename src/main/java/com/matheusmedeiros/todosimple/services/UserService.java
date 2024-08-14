@@ -2,6 +2,7 @@ package com.matheusmedeiros.todosimple.services;
 
 import com.matheusmedeiros.todosimple.models.User;
 import com.matheusmedeiros.todosimple.repositories.UserRepository;
+import com.matheusmedeiros.todosimple.services.exceptions.DataBindingViolationException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -51,7 +52,7 @@ public class UserService {
         try {
             this.userRepository.deleteById(id);
         }catch (Exception e){
-            throw new RuntimeException("Não é possivel deletar o User! pois este usuario tem tasks em aberto");
+            throw new DataBindingViolationException("Não é possivel deletar o User! pois este usuario tem tasks em aberto");
         }
     }
 
